@@ -30,7 +30,7 @@ export default function BookingConfirmed() {
 
   const whatsappMessage = encodeURIComponent(
     consultationType === "remote"
-      ? "Hi Kindred Path! I just submitted my details through the anniversary quiz and would like to ask about remote consultation options."
+      ? "Hi Kindred Path! I just submitted my details through the anniversary quiz and would like to ask about remote fertility consultation options."
       : "Hi Kindred Path! I just completed the anniversary consultation quiz and would like to confirm my free slot."
   );
 
@@ -76,8 +76,8 @@ export default function BookingConfirmed() {
 
             <p className="mx-auto max-w-sm text-[14px] leading-relaxed text-ink/65 sm:text-[15px]">
               {consultationType === "remote"
-                ? "Your details have been received. A Kindred Path coordinator will reach out shortly to talk through remote consultation options with you."
-                : "Your request for a free anniversary consultation has been received. A Kindred Path coordinator will reach out shortly to confirm your exact date and time in Ikeja."}
+                ? "Your details have been received. A Kindred Path coordinator will reach out shortly to discuss private remote fertility consultation options with you."
+                : "Your request for a free, private fertility consultation has been received. A Kindred Path coordinator will reach out shortly to confirm your exact date and time in Ikeja."}
             </p>
 
             <div className="mx-auto mt-4 max-w-sm rounded-xl border border-plum-100 bg-plum-50/50 px-4 py-3 text-left">
