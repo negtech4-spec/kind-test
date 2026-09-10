@@ -4,12 +4,34 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { hasMarketingPixels } from "@/lib/marketing-config";
 import { getMarketingConsent, setMarketingConsent } from "@/lib/marketing-consent";
+import { configuredTrackingTools, sanitizeTrackingSettings } from "@/lib/tracking-settings";
 
 export default function CookieConsent() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    setVisible(hasMarketingPixels && !getMarketingConsent());
+    let mounted = true;
+    const syncVisibility = (hasTools: boolean) => {
+      if (mounted) setVisible(hasTools && !getMarketingConsent());
+    };
+
+    // Environment values allow an immediate banner. The public runtime config
+    // lets a signed-in admin add tags without needing a redeploy.
+    syncVisibility(hasMarketingPixels);
+    fetch("/api/tracking-config", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload: unknown) => {
+        if (!payload || typeof payload !== "object") return;
+        const settings = sanitizeTrackingSettings((payload as { settings?: unknown }).settings);
+        syncVisibility(hasMarketingPixels || configuredTrackingTools(settings) > 0);
+      })
+      .catch(() => {
+        // Keep the initial environment-based decision if the config request fails.
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   if (!visible) return null;

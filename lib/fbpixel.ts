@@ -1,5 +1,3 @@
-import { marketingPixelConfig } from "@/lib/marketing-config";
-
 /**
  * Thin wrapper around window.fbq. Every call is guarded so nothing throws
  * if the Pixel hasn't loaded yet (ad blockers, slow network, consent not
@@ -12,8 +10,6 @@ declare global {
     __kpLastMetaPage?: string;
   }
 }
-
-export const FB_PIXEL_ID = marketingPixelConfig.metaPixelId;
 
 /** Fire a route-change PageView (the base snippet only fires the first one). */
 export function fbPageView() {

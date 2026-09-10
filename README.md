@@ -24,11 +24,13 @@ Local development can use `data/*.json`. A serverless deployment must use Supaba
 
 1. Create a Supabase project.
 2. Open its SQL Editor and run [`supabase/schema.sql`](supabase/schema.sql).
-3. Add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` to the production environment.
+3. Add `SUPABASE_URL` and **one** server-only database key to the production environment: the current recommended `SUPABASE_SECRET_KEY`, or the legacy `SUPABASE_SERVICE_ROLE_KEY` if that is the key your existing project provides.
 4. Set a strong `ADMIN_PASSWORD` and a unique `ADMIN_SESSION_SECRET` in the production environment.
 5. Set `NEXT_PUBLIC_SITE_URL` to the live quiz URL so the email logos and generated campaign links use the correct branded domain.
 
-The service-role key is server-only. Never prefix it with `NEXT_PUBLIC_` or put it in browser code.
+The Supabase secret/service-role key is server-only. Never prefix it with `NEXT_PUBLIC_` or put it in browser code. The app uses the key as a Supabase `apikey`, which supports current `sb_secret_…` keys and legacy service-role keys.
+
+When updating an existing deployment, run the current `supabase/schema.sql` again. Its changes are additive: existing events, leads and campaign links are preserved while the lead-workflow and tracking-settings fields are added.
 
 If persistent storage is not configured on a serverless host, the admin page shows a clear setup message instead of throwing an application error, and the lead endpoint declines the submission instead of falsely confirming data that was not saved.
 
@@ -53,7 +55,13 @@ The first-party dashboard records anonymous visitor and visit IDs, page path, ti
 
 Answers and contact details are stored only with a submitted lead, not in the activity event log. The admin includes visitor/visit/lead metrics, a traffic trend, acquisition table, top pages, devices, funnel, source-attributed leads, recent activity and visitor progression.
 
+### Lead operations
+
+Every successfully submitted contact form appears in the protected **Lead operations** workspace. An admin can search and filter leads; view contact details, all selected answers, source, referrer, campaign, content code and landing page; message the person on WhatsApp; email them; add private notes; set a follow-up date; and move the record through New, Contacted, Scheduled, Booked, Nurture or Closed. A signed-in admin can download a protected CSV backup at any time.
+
 No quiz answer, name, phone number or email address is sent to advertising platforms, UTM URLs or first-party activity metadata.
+
+Vercel Web Analytics and Speed Insights are also included in the app layout. Enable those products in the Vercel project dashboard if you want their separate aggregate reports.
 
 ### Campaign links
 
@@ -61,21 +69,24 @@ The protected dashboard can create a unique `/go/<short-code>` link for every so
 
 Use a separate link for each placement or creative, for example one for a Facebook feed ad, another for an Instagram story, and another for a printed QR code. This first-party trail remains available even if a marketing pixel is blocked.
 
-## Optional pixels
+## Pixels, tags and session insights
 
-Set any of the public environment values in `.env.local.example` to enable the corresponding tool:
+The signed-in `/admin` workspace contains the normal setup screen for these supported tools:
 
 - Meta Pixel
 - Google Tag Manager, GA4 and Google Ads
 - TikTok Pixel
 - LinkedIn Insight Tag
 - Microsoft UET
+- Microsoft Clarity
 
-The visitor sees a consent choice before any optional marketing pixel loads. Google Tag Manager can also carry any additional approved tags without changing the application code.
+Paste an official vendor tag snippet or its public ID into that page. The importer extracts the recognised ID and saves it in the protected database. It does not blindly execute pasted JavaScript; for a vendor that is not listed, use a consent-aware Custom HTML tag in Google Tag Manager instead. This prevents an accidental pasted script from creating a security or privacy issue on the public healthcare site.
+
+The visitor sees a consent choice before any optional marketing tag loads. Google Tag Manager can also carry approved additional tags without changing application code.
 
 After a successfully saved lead, consented tools receive only a generic lead-conversion event. For Google Ads and LinkedIn lead conversions, also add `NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_LABEL` and `NEXT_PUBLIC_LINKEDIN_CONVERSION_ID` after creating the matching conversion actions in those platforms.
 
-Use one Google setup, not two: either set `NEXT_PUBLIC_GTM_ID` and configure GA4/Google Ads inside Google Tag Manager, or leave GTM blank and set the direct GA4/Google Ads values. When GTM is present, the app deliberately suppresses direct Google tags to avoid duplicate page views and lead conversions.
+Use one Google setup, not two: either configure GTM and add GA4/Google Ads inside it, or leave GTM blank and use the direct GA4/Google Ads fields. When GTM is present, the app deliberately suppresses direct Google tags to avoid duplicate page views and lead conversions. The `NEXT_PUBLIC_…` tracking values in `.env.local.example` are optional fallback values for a code-managed setup; a saved admin configuration takes priority.
 
 ## Email notifications
 

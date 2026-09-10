@@ -1,6 +1,7 @@
 -- Run this once in the Supabase SQL Editor for the Kindred Path quiz.
--- The app accesses these tables only from server routes using the service-role
--- key. Do not put that key in a NEXT_PUBLIC_ environment variable.
+-- The app accesses these tables only from server routes using a Supabase
+-- secret key (or legacy service-role key). Do not put that key in a
+-- NEXT_PUBLIC_ environment variable.
 
 create table if not exists public.kindred_path_quiz_events (
   id text primary key,
@@ -50,6 +51,11 @@ create table if not exists public.kindred_path_quiz_leads (
   utm_term text,
   utm_content text,
   landing_path text,
+  status text not null default 'new'
+    check (status in ('new', 'contacted', 'consultation_scheduled', 'consultation_booked', 'nurture', 'closed')),
+  admin_note text,
+  follow_up_at bigint,
+  updated_at bigint,
   timestamp bigint not null
 );
 
@@ -61,12 +67,22 @@ alter table public.kindred_path_quiz_leads add column if not exists utm_campaign
 alter table public.kindred_path_quiz_leads add column if not exists utm_term text;
 alter table public.kindred_path_quiz_leads add column if not exists utm_content text;
 alter table public.kindred_path_quiz_leads add column if not exists landing_path text;
+alter table public.kindred_path_quiz_leads add column if not exists status text not null default 'new';
+alter table public.kindred_path_quiz_leads add column if not exists admin_note text;
+alter table public.kindred_path_quiz_leads add column if not exists follow_up_at bigint;
+alter table public.kindred_path_quiz_leads add column if not exists updated_at bigint;
 
 create index if not exists kindred_path_quiz_leads_timestamp_idx
   on public.kindred_path_quiz_leads (timestamp desc);
 
 create index if not exists kindred_path_quiz_leads_source_idx
   on public.kindred_path_quiz_leads (source);
+
+create index if not exists kindred_path_quiz_leads_status_idx
+  on public.kindred_path_quiz_leads (status);
+
+create index if not exists kindred_path_quiz_leads_follow_up_at_idx
+  on public.kindred_path_quiz_leads (follow_up_at asc);
 
 -- Admin-created, first-party tracking links. Each link safely redirects only
 -- to a known quiz destination and carries its own UTM/creative identifier.
@@ -88,9 +104,27 @@ create index if not exists kindred_path_campaign_links_created_at_idx
 create index if not exists kindred_path_campaign_links_slug_idx
   on public.kindred_path_campaign_links (slug);
 
+-- One protected record stores only public advertising/tag identifiers. It
+-- never contains vendor API keys, visitor contact details, or quiz answers.
+create table if not exists public.kindred_path_tracking_settings (
+  id text primary key check (id = 'default'),
+  meta_pixel_id text,
+  google_tag_manager_id text,
+  ga4_measurement_id text,
+  google_ads_id text,
+  google_ads_conversion_label text,
+  tiktok_pixel_id text,
+  linkedin_partner_id text,
+  linkedin_conversion_id text,
+  microsoft_uet_tag_id text,
+  clarity_project_id text,
+  updated_at bigint not null
+);
+
 alter table public.kindred_path_quiz_events enable row level security;
 alter table public.kindred_path_quiz_leads enable row level security;
 alter table public.kindred_path_campaign_links enable row level security;
+alter table public.kindred_path_tracking_settings enable row level security;
 
 -- No public RLS policies are intentionally created. The browser cannot read
 -- or write these tables; only the server-side service role may access them.

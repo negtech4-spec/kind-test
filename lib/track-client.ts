@@ -4,8 +4,8 @@ import {
   type EventType,
 } from "@/lib/analytics";
 import { fbPageView, fbTrack } from "@/lib/fbpixel";
-import { marketingPixelConfig } from "@/lib/marketing-config";
 import { getMarketingConsent } from "@/lib/marketing-consent";
+import { activeTrackingSettings } from "@/lib/runtime-tracking";
 
 declare global {
   interface Window {
@@ -198,23 +198,24 @@ export function trackPageView() {
 export function trackMarketingLead() {
   if (typeof window === "undefined" || getMarketingConsent() !== "granted") return;
   try {
+    const settings = activeTrackingSettings();
     fbTrack("Lead", { content_name: "Consultation request" });
     window.gtag?.("event", "generate_lead", { event_category: "engagement" });
     window.dataLayer?.push({ event: "kindred_path_lead" });
 
     if (
-      marketingPixelConfig.googleAdsId &&
-      marketingPixelConfig.googleAdsConversionLabel
+      settings.googleAdsId &&
+      settings.googleAdsConversionLabel
     ) {
       window.gtag?.("event", "conversion", {
-        send_to: `${marketingPixelConfig.googleAdsId}/${marketingPixelConfig.googleAdsConversionLabel}`,
+        send_to: `${settings.googleAdsId}/${settings.googleAdsConversionLabel}`,
       });
     }
 
     window.ttq?.track?.("SubmitForm");
-    if (marketingPixelConfig.linkedInConversionId) {
+    if (settings.linkedInConversionId) {
       window.lintrk?.("track", {
-        conversion_id: marketingPixelConfig.linkedInConversionId,
+        conversion_id: settings.linkedInConversionId,
       });
     }
     window.uetq?.push("event", "generate_lead");

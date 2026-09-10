@@ -1,3 +1,5 @@
+import { EMPTY_TRACKING_SETTINGS, type TrackingSettings } from "@/lib/tracking-settings";
+
 function cleanId(value: string | undefined) {
   return (value ?? "").trim().replace(/[^A-Za-z0-9_-]/g, "");
 }
@@ -6,7 +8,9 @@ function cleanConversionLabel(value: string | undefined) {
   return (value ?? "").trim().replace(/[^A-Za-z0-9_-]/g, "");
 }
 
-export const marketingPixelConfig = {
+/** Environment values are a safe fallback; admin-managed IDs take precedence at runtime. */
+export const marketingPixelConfig: TrackingSettings = {
+  ...EMPTY_TRACKING_SETTINGS,
   metaPixelId: cleanId(process.env.NEXT_PUBLIC_FB_PIXEL_ID),
   googleTagManagerId: cleanId(process.env.NEXT_PUBLIC_GTM_ID),
   ga4MeasurementId: cleanId(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID),
@@ -20,6 +24,7 @@ export const marketingPixelConfig = {
     process.env.NEXT_PUBLIC_LINKEDIN_CONVERSION_ID
   ),
   microsoftUetTagId: cleanId(process.env.NEXT_PUBLIC_MICROSOFT_UET_TAG_ID),
+  clarityProjectId: cleanId(process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID),
 };
 
 export const hasMarketingPixels = [
@@ -30,4 +35,5 @@ export const hasMarketingPixels = [
   marketingPixelConfig.tiktokPixelId,
   marketingPixelConfig.linkedInPartnerId,
   marketingPixelConfig.microsoftUetTagId,
+  marketingPixelConfig.clarityProjectId,
 ].some(Boolean);

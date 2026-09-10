@@ -4,7 +4,6 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import CookieConsent from "@/components/CookieConsent";
-import FacebookPixel from "@/components/FacebookPixel";
 import MarketingPixels from "@/components/MarketingPixels";
 import "./globals.css";
 
@@ -44,11 +43,8 @@ export default function RootLayout({
     <html lang="en" className={`${fraunces.variable} ${inter.variable}`}>
       <body className="font-sans antialiased">
         <AnalyticsTracker />
-        <FacebookPixel />
         <MarketingPixels />
-
         {children}
-
         <CookieConsent />
         <Analytics />
         <SpeedInsights />

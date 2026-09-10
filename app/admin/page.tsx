@@ -4,11 +4,15 @@ import BrandHeader from "@/components/BrandHeader";
 import CampaignLinkManager, {
   type CampaignLinkDashboardRow,
 } from "@/components/CampaignLinkManager";
+import LeadManager from "@/components/LeadManager";
+import TrackingSettingsManager from "@/components/TrackingSettingsManager";
+import { marketingPixelConfig } from "@/lib/marketing-config";
 import {
   getStoreStatus,
   readCampaignLinks,
   readEvents,
   readLeads,
+  readTrackingSettings,
   type Lead,
   type QuizEvent,
 } from "@/lib/store";
@@ -219,10 +223,11 @@ function TrafficTrend({ points }: { points: Array<{ key: string; views: number; 
 }
 
 export default async function AdminDashboard({ searchParams }: DashboardProps) {
-  const [allEvents, allLeads, campaignLinks] = await Promise.all([
+  const [allEvents, allLeads, campaignLinks, savedTrackingSettings] = await Promise.all([
     readEvents(),
     readLeads(),
     readCampaignLinks(),
+    readTrackingSettings(),
   ]);
   const range = selectedRange(await searchParams);
   const rangeStart = range.days ? Date.now() - range.days * 24 * 60 * 60 * 1000 : 0;
@@ -315,14 +320,16 @@ export default async function AdminDashboard({ searchParams }: DashboardProps) {
   const recentEvents = [...events].sort((a, b) => b.timestamp - a.timestamp).slice(0, 100);
   const sessionRows = [...bySession.entries()].sort((a, b) => b[1].lastSeen - a[1].lastSeen).slice(0, 100);
   const remoteLeads = sortedLeads.filter((lead) => lead.consultationType === "remote").length;
+  const trackingSettings = savedTrackingSettings.updatedAt > 0 ? savedTrackingSettings : marketingPixelConfig;
   const pixelStatuses: Array<[string, boolean]> = [
-    ["Meta Pixel", Boolean(process.env.NEXT_PUBLIC_FB_PIXEL_ID)],
-    ["Google Tag Manager", Boolean(process.env.NEXT_PUBLIC_GTM_ID)],
-    ["GA4", Boolean(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID)],
-    ["Google Ads", Boolean(process.env.NEXT_PUBLIC_GOOGLE_ADS_ID)],
-    ["TikTok Pixel", Boolean(process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID)],
-    ["LinkedIn Insight", Boolean(process.env.NEXT_PUBLIC_LINKEDIN_PARTNER_ID)],
-    ["Microsoft UET", Boolean(process.env.NEXT_PUBLIC_MICROSOFT_UET_TAG_ID)],
+    ["Meta Pixel", Boolean(trackingSettings.metaPixelId)],
+    ["Google Tag Manager", Boolean(trackingSettings.googleTagManagerId)],
+    ["GA4", Boolean(trackingSettings.ga4MeasurementId)],
+    ["Google Ads", Boolean(trackingSettings.googleAdsId)],
+    ["TikTok Pixel", Boolean(trackingSettings.tiktokPixelId)],
+    ["LinkedIn Insight", Boolean(trackingSettings.linkedInPartnerId)],
+    ["Microsoft UET", Boolean(trackingSettings.microsoftUetTagId)],
+    ["Microsoft Clarity", Boolean(trackingSettings.clarityProjectId)],
   ];
   const configuredPixels = pixelStatuses.filter(([, enabled]) => enabled).length;
 
@@ -413,7 +420,7 @@ export default async function AdminDashboard({ searchParams }: DashboardProps) {
               ))}
             </div>
             <p className="mt-4 rounded-xl bg-plum-50 px-3 py-2.5 text-xs leading-relaxed text-plum-600">
-              {configuredPixels} of {pixelStatuses.length} optional tools configured. IDs are set privately through environment values, never entered in the browser.
+              {configuredPixels} of {pixelStatuses.length} optional tools configured. Manage IDs in the protected setup area below; no contact details or answers are shared with advertising tools.
             </p>
           </div>
         </section>
@@ -466,6 +473,8 @@ export default async function AdminDashboard({ searchParams }: DashboardProps) {
 
         <CampaignLinkManager rows={campaignLinkRows} baseUrl={siteOrigin} />
 
+        <TrackingSettingsManager initialSettings={savedTrackingSettings} />
+
         <section className="mt-7 rounded-2xl border border-plum-50 bg-white p-5 shadow-card sm:p-7">
           <div className="mb-5">
             <h2 className="font-serif text-xl font-medium text-plum-700">Quiz conversion funnel</h2>
@@ -487,13 +496,7 @@ export default async function AdminDashboard({ searchParams }: DashboardProps) {
           </div>
         </section>
 
-        <section className="mt-7 rounded-2xl border border-plum-50 bg-white p-5 shadow-card sm:p-7">
-          <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div><h2 className="font-serif text-xl font-medium text-plum-700">Captured leads</h2><p className="mt-1 text-sm text-ink/50">Private contact details and first-touch source, for timely follow-up.</p></div>
-            <span className="text-xs font-semibold text-plum-500">{sortedLeads.length} in {range.label.toLowerCase()}</span>
-          </div>
-          {sortedLeads.length === 0 ? <p className="text-sm text-ink/50">No leads yet.</p> : <div className="overflow-x-auto"><table className="w-full min-w-[810px] text-left text-sm"><thead><tr className="border-b border-plum-50 text-[11px] uppercase tracking-wide text-ink/40"><th className="pb-2 pr-4 font-medium">Name</th><th className="pb-2 pr-4 font-medium">Phone</th><th className="pb-2 pr-4 font-medium">Email</th><th className="pb-2 pr-4 font-medium">Type</th><th className="pb-2 pr-4 font-medium">Source</th><th className="pb-2 pr-4 font-medium">Campaign</th><th className="pb-2 font-medium">When</th></tr></thead><tbody>{sortedLeads.map((lead) => <tr key={lead.id} className="border-b border-plum-50/70"><td className="py-3 pr-4 font-semibold text-ink">{lead.fullName}</td><td className="py-3 pr-4 text-ink/70">{lead.phone}</td><td className="py-3 pr-4 text-ink/70">{lead.email || "Not provided"}</td><td className="py-3 pr-4"><span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${lead.consultationType === "remote" ? "bg-amber-50 text-amber-700" : "bg-plum-50 text-plum-600"}`}>{lead.consultationType === "remote" ? "Remote" : "In-person"}</span></td><td className="py-3 pr-4 text-xs text-ink/60">{sourceForLead(lead)}</td><td className="py-3 pr-4 text-xs text-ink/60">{lead.utmCampaign || "Not recorded"}</td><td className="py-3 text-xs text-ink/50">{formatDate(lead.timestamp)}</td></tr>)}</tbody></table></div>}
-        </section>
+        <LeadManager leads={allLeads} />
 
         <section className="mt-7 grid gap-6 xl:grid-cols-2">
           <div className="rounded-2xl border border-plum-50 bg-white p-5 shadow-card sm:p-7">

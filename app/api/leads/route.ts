@@ -42,6 +42,10 @@ export async function POST(req: Request) {
       q4: q4 ?? null,
       consultationType: consultationType === "remote" ? "remote" : "in_person",
       ...toLeadAttribution(attribution),
+      status: "new",
+      adminNote: null,
+      followUpAt: null,
+      updatedAt: Date.now(),
       timestamp: Date.now(),
     };
 

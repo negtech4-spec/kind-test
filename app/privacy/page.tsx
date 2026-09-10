@@ -63,12 +63,12 @@ export default function PrivacyPolicy() {
               </p>
               <p>
                 If enabled by Kindred Path, optional marketing tools such as
-                Meta, Google, TikTok, LinkedIn or Microsoft advertising tags
-                load only after you choose to allow marketing pixels. These
-                tools receive general page and conversion events only. We do
-                not send consultation answers or contact details to them. You
-                can choose essential-only use from the privacy banner whenever
-                it appears.
+                Meta, Google, TikTok, LinkedIn, Microsoft advertising tags or
+                session-insight tools load only after you choose to allow
+                marketing pixels. These tools receive general page and
+                conversion events only. We do not send consultation answers or
+                contact details to them. You can choose essential-only use from
+                the privacy banner whenever it appears.
               </p>
             </div>
 
