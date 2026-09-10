@@ -1,0 +1,156 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background-color: #f9f9fb;
+  color: #241233;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* subtle grain texture for the page background, evokes a clinic-linen feel without being loud */
+.bg-texture {
+  background-image: radial-gradient(circle at 1px 1px, rgba(74, 29, 110, 0.05) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+.option-radio {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 2px solid #cbaee0;
+  display: inline-block;
+  position: relative;
+  flex-shrink: 0;
+  transition: border-color 0.15s ease;
+}
+
+.option-radio:checked {
+  border-color: #4a1d6e;
+}
+
+.option-radio:checked::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 999px;
+  background: #4a1d6e;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid #4a1d6e;
+  outline-offset: 3px;
+}
+
+/*
+ * Full-screen quiz pages own their safe-area spacing. Keeping it off <body>
+ * is important: body padding plus min-h-dvh makes a page taller than the
+ * visible device viewport and causes the unwanted vertical scroll.
+ */
+.screen-shell {
+  box-sizing: border-box;
+  min-height: 100svh;
+  height: 100svh;
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+.screen-stack {
+  min-height: 0;
+}
+
+.screen-card {
+  max-height: 100%;
+}
+
+.screen-footer {
+  flex-shrink: 0;
+}
+
+.screen-question {
+  font-size: clamp(1.1rem, 4vw, 1.5rem);
+}
+
+.screen-helper {
+  font-size: clamp(0.78rem, 2.7vw, 0.9rem);
+}
+
+@media (max-height: 680px) {
+  .screen-shell {
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+
+  .screen-shell .brand-header {
+    gap: 0.75rem;
+  }
+
+  .screen-shell .brand-header img {
+    height: 2rem;
+  }
+
+  .screen-card-compact {
+    padding: 0.85rem 1rem;
+  }
+
+  .screen-card-compact .option-card {
+    padding: 0.65rem 0.75rem;
+  }
+
+  .screen-card-compact .option-card-text {
+    font-size: 0.875rem;
+  }
+
+  .screen-footer {
+    display: none;
+  }
+}
+
+@media (max-height: 560px) {
+  .screen-card-compact {
+    padding: 0.7rem 0.85rem;
+  }
+
+  .screen-card-compact .option-card {
+    padding: 0.5rem 0.65rem;
+  }
+
+  .screen-card-compact .option-radio {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-height: 500px) {
+  .screen-shell .brand-header {
+    display: none;
+  }
+
+  .screen-question {
+    font-size: 1.05rem;
+  }
+}
