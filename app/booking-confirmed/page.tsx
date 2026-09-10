@@ -21,6 +21,7 @@ export default function BookingConfirmed() {
     }
 
     trackStep("BookingConfirmedView");
+
     if (!sessionStorage.getItem("kp_lead_tracked")) {
       fbTrack("Lead", { content_name: "Anniversary Free Consultation Quiz" });
       sessionStorage.setItem("kp_lead_tracked", "1");
@@ -72,11 +73,82 @@ export default function BookingConfirmed() {
                   ? `You are set, ${firstName}.`
                   : "You are all set."}
             </h1>
+
             <p className="mx-auto max-w-sm text-[14px] leading-relaxed text-ink/65 sm:text-[15px]">
               {consultationType === "remote"
                 ? "Your details have been received. A Kindred Path coordinator will reach out shortly to talk through remote consultation options with you."
                 : "Your request for a free anniversary consultation has been received. A Kindred Path coordinator will reach out shortly to confirm your exact date and time in Ikeja."}
             </p>
+
+            <div className="mx-auto mt-4 max-w-sm rounded-xl border border-plum-100 bg-plum-50/50 px-4 py-3 text-left">
+              {consultationType === "in_person" ? (
+                <div className="flex gap-2.5">
+                  <svg
+                    className="mt-0.5 shrink-0 text-plum-500"
+                    width="17"
+                    height="17"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <circle cx="12" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.8" />
+                  </svg>
+
+                  <div>
+                    <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-plum-500">
+                      Visit location
+                    </p>
+                    <p className="mt-0.5 text-[13px] leading-snug text-ink/70">
+                      1–5 Oba Akinjobi Street, G.R.A., Ikeja, Lagos
+                    </p>
+                    <p className="mt-1 text-[11px] leading-snug text-ink/50">
+                      Please wait for your confirmed date and time before visiting.
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+
+              <div
+                className={`flex gap-2.5 ${
+                  consultationType === "in_person" ? "mt-3 border-t border-plum-100 pt-3" : ""
+                }`}
+              >
+                <svg
+                  className="mt-0.5 shrink-0 text-plum-500"
+                  width="17"
+                  height="17"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.8" />
+                  <path
+                    d="m4 7 8 6 8-6"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+
+                <div>
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-plum-500">
+                    Check your email
+                  </p>
+                  <p className="mt-0.5 text-[12px] leading-snug text-ink/60">
+                    If you provided an email address, look for our confirmation. If you cannot see it,
+                    please check Spam or Promotions and mark it as “Not spam.”
+                  </p>
+                </div>
+              </div>
+            </div>
 
             <a
               href={`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`}
@@ -99,7 +171,9 @@ export default function BookingConfirmed() {
               >
                 Back to homepage
               </Link>
+
               <span className="text-ink/20">·</span>
+
               <Link
                 href="/privacy"
                 onClick={() => trackStep("BookingPrivacyClicked")}
