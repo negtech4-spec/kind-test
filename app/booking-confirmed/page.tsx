@@ -23,7 +23,7 @@ export default function BookingConfirmed() {
     trackStep("BookingConfirmedView");
 
     if (!sessionStorage.getItem("kp_lead_tracked")) {
-      fbTrack("Lead", { content_name: "Anniversary Free Consultation Quiz" });
+      fbTrack("Lead");
       sessionStorage.setItem("kp_lead_tracked", "1");
     }
   }, []);
